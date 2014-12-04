@@ -12,6 +12,7 @@ Examples:
     python bbw_mapper.py 1data/chr1 1data/chr1.reads -o output1
 
 
+
 2. For 2data
     
     python bbw_mapper.py 2data/Chr19Partial 1data/Chr19Partial.bwref.reads -o output2
