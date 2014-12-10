@@ -3,8 +3,6 @@ import argparse
 import threading
 import re
 
-from getsize import total_size
-
 class BW_invert(object):
 
 	"""docstring for BW_invert"""
@@ -93,10 +91,7 @@ class BW_invert(object):
 			suffix = []
 			indices = range(len(self.reference))
 			self.suffix_array = sorted(indices, key=lambda i: self.reference[i:])
-			print self.suffix_array
 			print "Done with suffix array.. Phew!"
-			print "Suffix Array mem = ",total_size(self.suffix_array, verbose=False)/131072, "Mb"
-
 
 	def generate_count_dict(self):
 		if self.shortcut == True:
@@ -111,7 +106,6 @@ class BW_invert(object):
 				current_count[self.lc[i]] += 1
 				self.count_dict[i+1] = {ch:current_count[ch] for ch in self.symbols}
 			print "Done with count array"
-			print "Count dict mem = ",total_size(self.count_dict, verbose=False)/131072, "Mb"
 
 	def multi_threaded_patterns(self):
 		#prepare things for better pattern matching.
@@ -158,6 +152,7 @@ class BW_invert(object):
 				pass
 			else:
 				matches = self.suffix_array[self.top_pointer[thread]:self.bottom_pointer[thread]+1]
+				matches = [m.start() for m in re.finditer(cpattern, self.reference)]
 				''' Sample output
 				Col Field Type    Brief description
 				1   QNAME String  Query template NAME
@@ -175,7 +170,9 @@ class BW_invert(object):
 				R1      0       Chr1    8       255     9M      *       0       0       gattcaggg       * 
 				'''
 				cigar_score = str(len(cpattern)) + "M"
-				tup = (name,"0",self.ref_name, str(matches[0]+1), "255", cigar_score, "*","0","0",cpattern, "*")
+
+				for match in matches:
+					tup = (name,"0",self.ref_name, str(matches[0]+1), "255", cigar_score, "*","0","0",cpattern, "*")
 				self.hold_output.append(tup)
 				if len(self.hold_output) > 1000:
 					self.write_sam_results()
